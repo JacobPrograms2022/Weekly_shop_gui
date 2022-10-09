@@ -1,44 +1,60 @@
 import tkinter as tk
-from tkinter import *
-from subprocess import call
+from tkinter import CENTER, filedialog, PhotoImage
+import os
 
-def open_py_file():
-    for widget in display_window.winfo_children():
+root = tk.Tk() # Body, holds the structure of the app
+apps = []
+
+if os.path.isfile("save.txt"):
+    with open("save.txt", "r") as f:
+        tempApps = f.read()
+        tempApps = tempApps.split(",")
+        apps = [x for x in tempApps if x.strip()]
+
+def addApp(): # adds the file directory to the screen
+    for widget in frame.winfo_children():
         widget.destroy()
-    #call(["python",r"C:\Users\jacob\Documents\VScode\personal_projects\smite_god_randomizer_2_0\random_god.py"])
-    
-   
-ws = Tk()
-ws.title('Next Weeks Shop')
-ws.geometry('440x500')
-ws.config(bg='black')
+    filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+               filetypes=(("executables","*.exe"),("all files", "*.*"))) #file browser
 
+    apps.append(filename)
+    print(filename)
+    for app in apps:
+        label = tk.Label(frame, text=app, bg="gray")#pastes the directories to the screen
+        label.pack()
+
+def runApps():
+    for app in apps:
+        os.startfile(app)
+
+canvas = tk.Canvas(root, height=400, width=600, bg="#263D42") # size properties and colour
+canvas.pack()
 img = PhotoImage(file=r"C:\Users\jacob\Documents\VScode\personal_projects\weekly_shop\weekly_shop_gui\images\grocery_image.png")
-background = Label(
-    ws,
+background = tk.Label(
+    canvas,
     image=img
 )
 background.place(x=-220, y=0)
 
+frame = tk.Frame(canvas, bg="white")
+frame.place(relwidth=0.8, relheight=0.7, relx=0.1, rely=0.1) # creates frame, relx and rely centralize the frame. Width and Heigth take priority over relx and rely.
 
-display_window = tk.Frame(
-    ws,
-    height=180,
-    width=310,
-  
-    bg="light gray"
-)
-display_window.place(x=0, y=180) # change this (White box)
+openFile = tk.Button(frame, text="Open File", padx=10, 
+                    pady=5, fg="white", bg="#263D42", command=addApp) #Creates a button
 
-randomize = Button(
-    ws,
-    text='Randomize!',
-    relief=RAISED,
-    font=('Arial Bold', 18),
-    fg="white", 
-    bg="green",
-    command=open_py_file
-)
-randomize.place(x=390, y=380) # Button Placement
-god_text = tk.Label(display_window, height=180,width=420, bg = "light gray")
-ws.mainloop()
+openFile.pack()
+
+runApps = tk.Button(frame, text="Run Apps", padx=10, 
+                    pady=5, fg="white", bg="#263D42", command=runApps)
+runApps.pack()
+
+for app in apps:
+    label = tk.Label(frame, text=app)
+    label.pack()
+
+root.mainloop()
+
+
+with open("save.txt", "w") as f:
+    for app in apps:
+        f.write(app+",")
